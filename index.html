@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>陈师傅在干嘛？</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .title {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 30px;
+        }
+
+        /* Q版形象区域 */
+        .avatar-container {
+            width: 220px;
+            height: 220px;
+            margin: 0 auto 30px;
+            position: relative;
+            background: #fff;
+            border-radius: 20px;
+            padding: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* 日版黑白线稿风格 */
+        .manga-style {
+            filter: contrast(1.1);
+        }
+
+        /* 状态显示 */
+        .status-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .status-emoji {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+
+        .status-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .status-desc {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* 时间信息 */
+        .time-info {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .time-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .time-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .time-label {
+            color: #888;
+        }
+
+        .time-value {
+            color: #333;
+            font-weight: bold;
+        }
+
+        /* 进度条 */
+        .progress-container {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease;
+        }
+
+        .progress-bar.working {
+            background: linear-gradient(90deg, #ff6b6b, #ee5a5a);
+        }
+
+        .progress-bar.resting {
+            background: linear-gradient(90deg, #51cf66, #40c057);
+        }
+
+        .progress-bar.sleeping {
+            background: linear-gradient(90deg, #845ef7, #7950f2);
+        }
+
+        .progress-bar.preparing {
+            background: linear-gradient(90deg, #ffa726, #ff9800);
+        }
+
+        /* 即将到来的班次卡片 */
+        .upcoming-card {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #2196f3;
+            transition: all 0.3s ease;
+        }
+
+        .upcoming-card.preparing {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border-left-color: #ff9800;
+        }
+
+        .upcoming-card.working {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            border-left-color: #f44336;
+        }
+
+        .upcoming-card.resting {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-left-color: #4caf50;
+        }
+
+        .upcoming-label {
+            font-size: 12px;
+            color: #1976d2;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .upcoming-card.preparing .upcoming-label {
+            color: #e65100;
+        }
+
+        .upcoming-card.working .upcoming-label {
+            color: #c62828;
+        }
+
+        .upcoming-card.resting .upcoming-label {
+            color: #2e7d32;
+        }
+
+        .upcoming-main {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .upcoming-time {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1565c0;
+        }
+
+        .upcoming-card.preparing .upcoming-time {
+            color: #e65100;
+        }
+
+        .upcoming-card.working .upcoming-time {
+            color: #c62828;
+        }
+
+        .upcoming-card.resting .upcoming-time {
+            color: #2e7d32;
+        }
+
+        .upcoming-shift {
+            font-size: 18px;
+            color: #424242;
+            font-weight: 600;
+        }
+
+        .upcoming-detail {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* 轮班信息 */
+        .schedule-info {
+            background: #fff3cd;
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 13px;
+            color: #856404;
+        }
+
+        .schedule-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        /* 状态颜色主题 */
+        .theme-working { --main-color: #ff6b6b; }
+        .theme-resting { --main-color: #51cf66; }
+        .theme-sleeping { --main-color: #845ef7; }
+        .theme-commuting { --main-color: #ffa94d; }
+
+        /* 动态表情SVG */
+        .character-svg {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">陈师傅在干嘛？</h1>
+        <p class="subtitle">实时状态监控中...</p>
+
+        <!-- Q版形象 - 日版黑白线稿风格 -->
+        <div class="avatar-container">
+            <svg class="character-svg manga-style" viewBox="0 0 200 200" id="character">
+                <!-- 背景 -->
+                <rect x="10" y="10" width="180" height="180" fill="#fafafa" rx="10"/>
+                
+                <!-- 装饰性网点背景 -->
+                <pattern id="dots" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+                    <circle cx="2" cy="2" r="0.5" fill="#ddd"/>
+                </pattern>
+                <rect x="15" y="15" width="170" height="170" fill="url(#dots)" opacity="0.5" rx="8"/>
+                
+                <!-- 速度线（动态效果） -->
+                <g id="speed-lines" style="display: none;">
+                    <line x1="20" y1="50" x2="50" y2="55" stroke="#333" stroke-width="1" opacity="0.3"/>
+                    <line x1="15" y1="70" x2="45" y2="72" stroke="#333" stroke-width="1" opacity="0.3"/>
+                    <line x1="150" y1="45" x2="180" y2="48" stroke="#333" stroke-width="1" opacity="0.3"/>
+                </g>
+                
+                <!-- 身体轮廓 -->
+                <path d="M70 165 Q65 145 70 130 Q75 115 100 115 Q125 115 130 130 Q135 145 130 165" 
+                      fill="none" stroke="#222" stroke-width="2.5" stroke-linecap="round"/>
+                <!-- 衣服褶皱 -->
+                <path d="M80 140 Q90 145 100 142 Q110 145 120 140" fill="none" stroke="#222" stroke-width="1.5" opacity="0.6"/>
+                <path d="M85 155 L95 150 L105 155" fill="none" stroke="#222" stroke-width="1" opacity="0.4"/>
+                
+                <!-- 脖子 -->
+                <line x1="92" y1="115" x2="92" y2="105" stroke="#222" stroke-width="2"/>
+                <line x1="108" y1="115" x2="108" y2="105" stroke="#222" stroke-width="2"/>
+                
+                <!-- 头部轮廓 - 稍微圆润的少年脸型 -->
+                <path d="M60 85 Q60 45 100 40 Q140 45 140 85 Q140 110 125 120 Q100 128 75 120 Q60 110 60 85" 
+                      fill="#fff" stroke="#222" stroke-width="2.5"/>
+                
+                <!-- 头发 - 阳光少年发型，带呆毛 -->
+                <path d="M58 80 Q55 50 75 35 Q100 25 125 35 Q145 50 142 80 Q143 70 138 60 Q130 45 115 42 Q100 40 85 42 Q70 45 62 60 Q57 70 58 80" 
+                      fill="#fff" stroke="#222" stroke-width="2.5"/>
+                <!-- 发丝细节 -->
+                <path d="M75 38 Q85 45 100 43 Q115 45 125 38" fill="none" stroke="#222" stroke-width="1.5"/>
+                <path d="M70 50 Q80 55 90 52" fill="none" stroke="#222" stroke-width="1"/>
+                <path d="M130 50 Q120 55 110 52" fill="none" stroke="#222" stroke-width="1"/>
+                <!-- 呆毛 -->
+                <path d="M100 40 Q95 20 105 15 Q112 18 108 30 Q105 35 102 38" fill="none" stroke="#222" stroke-width="2" stroke-linecap="round"/>
+                
+                <!-- 耳朵 -->
+                <path d="M58 85 Q52 90 58 98" fill="none" stroke="#222" stroke-width="2"/>
+                <path d="M142 85 Q148 90 142 98" fill="none" stroke="#222" stroke-width="2"/>
+                <!-- 耳内轮廓 -->
+                <path d="M60 88 Q56 91 60 94" fill="none" stroke="#222" stroke-width="1"/>
+                <path d="M140 88 Q144 91 140 94" fill="none" stroke="#222" stroke-width="1"/>
+                
+                <!-- 眼睛 - 正常状态 -->
+                <g id="eyes">
+                    <!-- 左眼 -->
+                    <ellipse cx="82" cy="85" rx="9" ry="11" fill="#fff" stroke="#222" stroke-width="2"/>
+                    <circle cx="84" cy="85" r="4" fill="#222"/>
+                    <circle cx="85" cy="83" r="1.5" fill="#fff"/>
+                    <!-- 高光 -->
+                    <circle cx="86" cy="87" r="1" fill="#fff" opacity="0.8"/>
+                    <!-- 右眼 -->
+                    <ellipse cx="118" cy="85" rx="9" ry="11" fill="#fff" stroke="#222" stroke-width="2"/>
+                    <circle cx="116" cy="85" r="4" fill="#222"/>
+                    <circle cx="115" cy="83" r="1.5" fill="#fff"/>
+                    <circle cx="114" cy="87" r="1" fill="#fff" opacity="0.8"/>
+                    <!-- 眉毛 -->
+                    <path d="M72 72 Q82 70 92 72" fill="none" stroke="#222" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M108 72 Q118 70 128 72" fill="none" stroke="#222" stroke-width="1.5" stroke-linecap="round"/>
+                </g>
+                
+                <!-- 眼睛 - 睡觉状态 -->
+                <g id="eyes-closed" style="display: none;">
+                    <path d="M73 88 Q82 93 91 88" fill="none" stroke="#222" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="M109 88 Q118 93 127 88" fill="none" stroke="#222" stroke-width="2.5" stroke-linecap="round"/>
+                    <!-- 眉毛放松 -->
+                    <path d="M73 75 Q82 78 91 75" fill="none" stroke="#222" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M109 75 Q118 78 127 75" fill="none" stroke="#222" stroke-width="1.5" stroke-linecap="round"/>
+                </g>
+                
+                <!-- 眼睛 - 工作疲惫状态 -->
+                <g id="eyes-working" style="display: none;">
+                    <!-- 半闭的眼睛 -->
+                    <path d="M73 88 L91 88" fill="none" stroke="#222" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="M109 88 L127 88" fill="none" stroke="#222" stroke-width="2.5" stroke-linecap="round"/>
+                    <!-- 下眼睑线 -->
+                    <path d="M75 92 Q82 94 89 92" fill="none" stroke="#222" stroke-width="1"/>
+                    <path d="M111 92 Q118 94 125 92" fill="none" stroke="#222" stroke-width="1"/>
+                    <!-- 疲惫的眉毛 -->
+                    <path d="M73 75 L91 78" fill="none" stroke="#222" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M109 78 L127 75" fill="none" stroke="#222" stroke-width="1.5" stroke-linecap="round"/>
+                    <!-- 黑眼圈 -->
+                    <ellipse cx="82" cy="92" rx="8" ry="4" fill="none" stroke="#222" stroke-width="0.5" opacity="0.3"/>
+                    <ellipse cx="118" cy="92" rx="8" ry="4" fill="none" stroke="#222" stroke-width="0.5" opacity="0.3"/>
+                </g>
+                
+                <!-- 鼻子 -->
+                <path d="M100 95 L98 100" fill="none" stroke="#222" stroke-width="1.5" stroke-linecap="round"/>
+                
+                <!-- 腮红 - 线稿风格用斜线表示 -->
+                <g id="blush" opacity="0.3">
+                    <line x1="65" y1="102" x2="70" y2="108" stroke="#222" stroke-width="1"/>
+                    <line x1="70" y1="101" x2="75" y2="107" stroke="#222" stroke-width="1"/>
+                    <line x1="75" y1="100" x2="80" y2="106" stroke="#222" stroke-width="1"/>
+                    <line x1="120" y1="100" x2="125" y2="106" stroke="#222" stroke-width="1"/>
+                    <line x1="125" y1="101" x2="130" y2="107" stroke="#222" stroke-width="1"/>
+                    <line x1="130" y1="102" x2="135" y2="108" stroke="#222" stroke-width="1"/>
+                </g>
+                
+                <!-- 嘴巴 - 正常微笑 -->
+                <path id="mouth" d="M88 110 Q100 118 112 110" fill="none" stroke="#222" stroke-width="2" stroke-linecap="round"/>
+                
+                <!-- 嘴巴 - 张嘴惊讶（工作） -->
+                <g id="mouth-working" style="display: none;">
+                    <ellipse cx="100" cy="114" rx="4" ry="5" fill="#222"/>
+                </g>
+                
+                <!-- 嘴巴 - 安详睡觉 -->
+                <g id="mouth-sleeping" style="display: none;">
+                    <path d="M95 112 Q100 110 105 112" fill="none" stroke="#222" stroke-width="1.5" stroke-linecap="round"/>
+                </g>
+                
+                <!-- 睡觉时的zzz - 线稿风格 -->
+                <g id="zzz" style="display: none;">
+                    <text x="145" y="55" font-size="18" fill="#222" font-weight="bold" font-family="serif">Z</text>
+                    <text x="155" y="42" font-size="14" fill="#222" font-weight="bold" font-family="serif">z</text>
+                    <text x="163" y="32" font-size="10" fill="#222" font-weight="bold" font-family="serif">z</text>
+                    <!-- 添加睡泡 -->
+                    <circle cx="140" cy="65" r="2" fill="none" stroke="#222" stroke-width="1"/>
+                    <circle cx="150" cy="60" r="3" fill="none" stroke="#222" stroke-width="1"/>
+                    <circle cx="162" cy="52" r="4" fill="none" stroke="#222" stroke-width="1"/>
+                </g>
+                
+                <!-- 工作时汗珠 - 漫画风格 -->
+                <g id="sweat" style="display: none;">
+                    <path d="M145 55 Q150 48 152 58 Q153 68 145 62" fill="none" stroke="#222" stroke-width="1.5"/>
+                    <path d="M155 70 Q158 65 159 72 Q160 78 155 74" fill="none" stroke="#222" stroke-width="1"/>
+                    <!-- 汗珠高光 -->
+                    <circle cx="148" cy="55" r="1" fill="#222"/>
+                </g>
+                
+                <!-- 休息时的音符 - 线稿 -->
+                <g id="music" style="display: none;">
+                    <text x="145" y="50" font-size="20" fill="#222" font-family="serif">♪</text>
+                    <text x="160" y="38" font-size="14" fill="#222" font-family="serif">♫</text>
+                    <!-- 心形 -->
+                    <path d="M150 65 Q145 60 148 55 Q150 52 153 55 Q156 52 158 55 Q161 60 156 65 Q153 70 150 65" fill="none" stroke="#222" stroke-width="1"/>
+                </g>
+                
+                <!-- 手臂 -->
+                <g id="arms">
+                    <path d="M70 135 Q55 145 50 160 Q48 168 55 165" fill="none" stroke="#222" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M130 135 Q145 145 150 160 Q152 168 145 165" fill="none" stroke="#222" stroke-width="2" stroke-linecap="round"/>
+                    <!-- 手指 -->
+                    <path d="M52 162 Q50 166 55 167" fill="none" stroke="#222" stroke-width="1.5"/>
+                    <path d="M148 162 Q150 166 145 167" fill="none" stroke="#222" stroke-width="1.5"/>
+                </g>
+                
+                <!-- 睡觉时的抱枕 - 线稿 -->
+                <g id="pillow" style="display: none;">
+                    <ellipse cx="100" cy="160" rx="45" ry="25" fill="none" stroke="#222" stroke-width="2"/>
+                    <!-- 抱枕纹理 -->
+                    <path d="M70 155 Q100 160 130 155" fill="none" stroke="#222" stroke-width="1" opacity="0.5"/>
+                    <path d="M75 165 Q100 170 125 165" fill="none" stroke="#222" stroke-width="1" opacity="0.5"/>
+                    <!-- Zzz图案 -->
+                    <text x="100" y="165" font-size="12" fill="#222" text-anchor="middle" opacity="0.5">zZz</text>
+                </g>
+                
+                <!-- 工作时的工具/文件 - 线稿 -->
+                <g id="tools" style="display: none;">
+                    <!-- 文件/文件夹 -->
+                    <rect x="145" y="110" width="20" height="30" fill="none" stroke="#222" stroke-width="1.5" rx="2"/>
+                    <path d="M145 118 L165 118" stroke="#222" stroke-width="1"/>
+                    <path d="M148 115 L150 115" stroke="#222" stroke-width="1"/>
+                    <!-- 笔 -->
+                    <line x1="155" y1="110" x2="155" y2="100" stroke="#222" stroke-width="2"/>
+                    <path d="M153 100 L157 100 L155 95 Z" fill="#222"/>
+                </g>
+                
+                <!-- 准备上班状态 - 背包/水壶 -->
+                <g id="preparing" style="display: none;">
+                    <!-- 背包 -->
+                    <rect x="135" y="120" width="30" height="35" fill="none" stroke="#222" stroke-width="1.5" rx="5"/>
+                    <path d="M140 120 L140 115 Q150 110 160 115 L160 120" fill="none" stroke="#222" stroke-width="1.5"/>
+                    <!-- 背包口袋 -->
+                    <rect x="142" y="135" width="16" height="12" fill="none" stroke="#222" stroke-width="1" rx="2"/>
+                    <!-- 闪光效果表示准备就绪 -->
+                    <line x1="170" y1="100" x2="175" y2="95" stroke="#222" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="175" y1="105" x2="182" y2="102" stroke="#222" stroke-width="1" stroke-linecap="round"/>
+                    <line x1="172" y1="112" x2="178" y2="110" stroke="#222" stroke-width="1" stroke-linecap="round"/>
+                </g>
+                
+                <!-- 准备状态的眼睛 - 精神饱满 -->
+                <g id="eyes-preparing" style="display: none;">
+                    <!-- 左眼 - 更有神 -->
+                    <ellipse cx="82" cy="85" rx="9" ry="11" fill="#fff" stroke="#222" stroke-width="2"/>
+                    <circle cx="84" cy="85" r="5" fill="#222"/>
+                    <circle cx="86" cy="83" r="2" fill="#fff"/>
+                    <circle cx="83" cy="87" r="1.5" fill="#fff" opacity="0.9"/>
+                    <!-- 右眼 -->
+                    <ellipse cx="118" cy="85" rx="9" ry="11" fill="#fff" stroke="#222" stroke-width="2"/>
+                    <circle cx="116" cy="85" r="5" fill="#222"/>
+                    <circle cx="114" cy="83" r="2" fill="#fff"/>
+                    <circle cx="117" cy="87" r="1.5" fill="#fff" opacity="0.9"/>
+                    <!-- 精神眉毛 -->
+                    <path d="M72 68 Q82 65 92 68" fill="none" stroke="#222" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M108 68 Q118 65 128 68" fill="none" stroke="#222" stroke-width="2" stroke-linecap="round"/>
+                </g>
+                
+                <!-- 准备状态的嘴巴 - 自信微笑 -->
+                <g id="mouth-preparing" style="display: none;">
+                    <path d="M85 112 Q100 122 115 112" fill="none" stroke="#222" stroke-width="2.5" stroke-linecap="round"/>
+                    <!-- 牙齿 -->
+                    <path d="M92 115 Q100 118 108 115" fill="none" stroke="#222" stroke-width="1" opacity="0.5"/>
+                </g>
+                
+                <!-- 对话框（根据状态显示不同内容） -->
+                <g id="speech-bubble" style="display: none;">
+                    <ellipse cx="160" cy="35" rx="35" ry="20" fill="#fff" stroke="#222" stroke-width="1.5"/>
+                    <path d="M135 45 L125 55 L140 48" fill="#fff" stroke="#222" stroke-width="1.5"/>
+                    <path d="M137 47 L128 53 L139 48" fill="#fff"/>
+                    <text id="bubble-text" x="160" y="40" font-size="10" fill="#222" text-anchor="middle">工作中</text>
+                </g>
+            </svg>
+        </div>
+
+        <!-- 状态卡片 -->
+        <div class="status-card" id="statusCard">
+            <div class="status-emoji" id="statusEmoji">💼</div>
+            <div class="status-text" id="statusText">工作中</div>
+            <div class="status-desc" id="statusDesc">正在上前夜班</div>
+            <div class="progress-container">
+                <div class="progress-bar working" id="progressBar" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- 时间信息 -->
+        <div class="time-info">
+            <div class="time-row">
+                <span class="time-label">当前时间</span>
+                <span class="time-value" id="currentTime">--:--</span>
+            </div>
+            <div class="time-row">
+                <span class="time-label">本轮第几天</span>
+                <span class="time-value" id="cycleDay">第2天</span>
+            </div>
+            <div class="time-row">
+                <span class="time-label" id="timeLeftLabel">距离上班还有</span>
+                <span class="time-value" id="timeLeft">--小时--分</span>
+            </div>
+        </div>
+
+        <!-- 即将到来的班次 -->
+        <div class="upcoming-card" id="upcomingCard">
+            <div class="upcoming-label">⏰ 即将上什么班</div>
+            <div class="upcoming-main">
+                <span class="upcoming-time" id="upcomingTime">--小时--分后</span>
+                <span class="upcoming-shift" id="upcomingShift">上白班</span>
+            </div>
+            <div class="upcoming-detail" id="upcomingDetail">08:00 - 19:00</div>
+        </div>
+
+        <!-- 排班信息 -->
+        <div class="schedule-info">
+            <div class="schedule-title">📅 8天轮班周期</div>
+            <div id="scheduleDetail">今天是4月30日，本轮第2天，19:00-次日02:30前夜班</div>
+        </div>
+    </div>
+
+    <script>
+        // 轮班配置 - 8天一轮
+        // 第1天: 白班 08:00-19:00
+        // 第2天: 后夜班 02:30-08:30 + 前夜班 19:00-02:30(次日)
+        // 第3天: 小休
+        // 第4天: 白班 08:00-19:00
+        // 第5天: 后夜班 02:30-08:30 + 前夜班 19:00-02:30(次日)
+        // 第6-8天: 大休
+        
+        // 基准日期：2026年4月30日是第2天
+        const BASE_DATE = new Date('2026-04-30');
+        const BASE_CYCLE_DAY = 2;
+        
+        // 班次定义
+        const SCHEDULE = {
+            1: { name: '白班', type: 'day', start: '08:00', end: '19:00', emoji: '☀️' },
+            2: { 
+                name: '前后夜班', 
+                type: 'night', 
+                shifts: [
+                    { name: '后夜班', start: '02:30', end: '08:30' },
+                    { name: '前夜班', start: '19:00', end: '26:30' } // 26:30 = 次日02:30
+                ],
+                emoji: '🌙'
+            },
+            3: { name: '小休', type: 'rest', emoji: '😴' },
+            4: { name: '白班', type: 'day', start: '08:00', end: '19:00', emoji: '☀️' },
+            5: { 
+                name: '前后夜班', 
+                type: 'night', 
+                shifts: [
+                    { name: '后夜班', start: '02:30', end: '08:30' },
+                    { name: '前夜班', start: '19:00', end: '26:30' }
+                ],
+                emoji: '🌙'
+            },
+            6: { name: '大休-第1天', type: 'rest', emoji: '🎉' },
+            7: { name: '大休-第2天', type: 'rest', emoji: '🎉' },
+            8: { name: '大休-第3天', type: 'rest', emoji: '🎉' }
+        };
+
+        // 获取当前是第几天
+        function getCurrentCycleDay(date) {
+            const diffTime = date - BASE_DATE;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            let cycleDay = ((BASE_CYCLE_DAY - 1 + diffDays) % 8) + 1;
+            // 处理负数
+            if (cycleDay <= 0) cycleDay += 8;
+            return cycleDay;
+        }
+
+        // 时间字符串转分钟数
+        function timeToMinutes(timeStr) {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            return hours * 60 + minutes;
+        }
+
+        // 获取当前状态
+        function getCurrentStatus(date) {
+            const cycleDay = getCurrentCycleDay(date);
+            const schedule = SCHEDULE[cycleDay];
+            const currentMinutes = date.getHours() * 60 + date.getMinutes();
+            
+            // 判断是否在睡觉时间 (22:00 - 08:30)
+            const sleepStart = timeToMinutes('22:00');
+            const sleepEnd = timeToMinutes('08:30');
+            
+            // 休息日
+            if (schedule.type === 'rest') {
+                // 判断是否睡觉时间
+                if (currentMinutes >= sleepStart || currentMinutes < sleepEnd) {
+                    return {
+                        status: 'sleeping',
+                        emoji: '😴',
+                        text: '睡觉中',
+                        desc: '正在美美的梦乡中',
+                        progress: 0,
+                        nextChange: sleepEnd
+                    };
+                }
+                return {
+                    status: 'resting',
+                    emoji: schedule.emoji,
+                    text: '休息中',
+                    desc: `${schedule.name} - 享受自由时光`,
+                    progress: 0,
+                    nextChange: sleepStart
+                };
+            }
+            
+            // 白班日
+            if (schedule.type === 'day') {
+                const workStart = timeToMinutes(schedule.start);
+                const workEnd = timeToMinutes(schedule.end);
+                const prepStart = workStart - 60; // 白班前1小时开始准备
+                
+                // 上班前睡觉
+                if (currentMinutes < sleepEnd && currentMinutes >= 0) {
+                    return {
+                        status: 'sleeping',
+                        emoji: '😴',
+                        text: '睡觉中',
+                        desc: '养精蓄锐准备上班',
+                        progress: 0,
+                        nextChange: sleepEnd
+                    };
+                }
+
+                // 准备上班状态 - 白班前1小时
+                if (currentMinutes >= prepStart && currentMinutes < workStart) {
+                    const prepTotal = 60;
+                    const prepElapsed = currentMinutes - prepStart;
+                    const progress = (prepElapsed / prepTotal) * 100;
+                    return {
+                        status: 'preparing',
+                        emoji: '🎒',
+                        text: '准备上班',
+                        desc: `即将上白班，收拾准备中`,
+                        progress: progress,
+                        timeLeft: workStart - currentMinutes,
+                        nextChange: workStart
+                    };
+                }
+                
+                // 工作中
+                if (currentMinutes >= workStart && currentMinutes < workEnd) {
+                    const totalWork = workEnd - workStart;
+                    const elapsed = currentMinutes - workStart;
+                    const progress = (elapsed / totalWork) * 100;
+                    return {
+                        status: 'working',
+                        emoji: schedule.emoji,
+                        text: '工作中',
+                        desc: `正在上${schedule.name} ${schedule.start}-${schedule.end}`,
+                        progress: progress,
+                        timeLeft: workEnd - currentMinutes,
+                        nextChange: workEnd
+                    };
+                }
+                
+                // 下班后休息
+                if (currentMinutes >= workEnd && currentMinutes < sleepStart) {
+                    return {
+                        status: 'resting',
+                        emoji: '😊',
+                        text: '休息中',
+                        desc: '白班结束，放松时间',
+                        progress: 0,
+                        nextChange: sleepStart
+                    };
+                }
+                
+                // 睡觉时间
+                if (currentMinutes >= sleepStart) {
+                    return {
+                        status: 'sleeping',
+                        emoji: '😴',
+                        text: '睡觉中',
+                        desc: '准备明天的班次',
+                        progress: 0,
+                        nextChange: sleepEnd + 24 * 60 // 次日
+                    };
+                }
+            }
+            
+            // 夜班日
+            if (schedule.type === 'night') {
+                const shift1Start = timeToMinutes(schedule.shifts[0].start);
+                const shift1End = timeToMinutes(schedule.shifts[0].end);
+                const shift2Start = timeToMinutes(schedule.shifts[1].start);
+                const shift2End = timeToMinutes(schedule.shifts[1].end); // 26:30
+                const shift1PrepStart = shift1Start - 20; // 后夜班前20分钟准备
+                const shift2PrepStart = shift2Start - 60; // 前夜班前1小时准备
+                
+                // 准备上班状态 - 后夜班前20分钟
+                if (currentMinutes >= shift1PrepStart && currentMinutes < shift1Start) {
+                    const prepTotal = 20;
+                    const prepElapsed = currentMinutes - shift1PrepStart;
+                    const progress = (prepElapsed / prepTotal) * 100;
+                    return {
+                        status: 'preparing',
+                        emoji: '🎒',
+                        text: '准备上班',
+                        desc: `即将上后夜班，准备出门`,
+                        progress: progress,
+                        timeLeft: shift1Start - currentMinutes,
+                        nextChange: shift1Start
+                    };
+                }
+                
+                // 第一个夜班 (02:30-08:30)
+                if (currentMinutes >= shift1Start && currentMinutes < shift1End) {
+                    const totalWork = shift1End - shift1Start;
+                    const elapsed = currentMinutes - shift1Start;
+                    const progress = (elapsed / totalWork) * 100;
+                    return {
+                        status: 'working',
+                        emoji: '🌙',
+                        text: '工作中',
+                        desc: `正在上后夜班 ${schedule.shifts[0].start}-${schedule.shifts[0].end}`,
+                        progress: progress,
+                        timeLeft: shift1End - currentMinutes,
+                        nextChange: shift1End
+                    };
+                }
+
+                // 准备上班状态 - 前夜班前1小时
+                if (currentMinutes >= shift2PrepStart && currentMinutes < shift2Start) {
+                    const prepTotal = 60;
+                    const prepElapsed = currentMinutes - shift2PrepStart;
+                    const progress = (prepElapsed / prepTotal) * 100;
+                    return {
+                        status: 'preparing',
+                        emoji: '🎒',
+                        text: '准备上班',
+                        desc: `即将上前夜班，收拾准备中`,
+                        progress: progress,
+                        timeLeft: shift2Start - currentMinutes,
+                        nextChange: shift2Start
+                    };
+                }
+                
+                // 两个夜班之间的休息
+                if (currentMinutes >= shift1End && currentMinutes < shift2PrepStart) {
+                    return {
+                        status: 'resting',
+                        emoji: '☕',
+                        text: '休息中',
+                        desc: '刚下后夜班，休息充电中',
+                        progress: 0,
+                        nextChange: shift2PrepStart
+                    };
+                }
+                
+                // 第二个夜班 (19:00-次日02:30)
+                if (currentMinutes >= shift2Start) {
+                    const totalWork = shift2End - shift2Start;
+                    const elapsed = currentMinutes - shift2Start;
+                    const progress = (elapsed / totalWork) * 100;
+                    return {
+                        status: 'working',
+                        emoji: '🌙',
+                        text: '工作中',
+                        desc: `正在上前夜班 ${schedule.shifts[1].start}-次日${schedule.shifts[1].end.substring(0, 5)}`,
+                        progress: progress,
+                        timeLeft: shift2End - currentMinutes,
+                        nextChange: shift2End
+                    };
+                }
+                
+                // 凌晨02:30-08:30 睡觉
+                if (currentMinutes >= 0 && currentMinutes < sleepEnd) {
+                    return {
+                        status: 'sleeping',
+                        emoji: '😴',
+                        text: '睡觉中',
+                        desc: '刚下前夜班，补觉中',
+                        progress: 0,
+                        nextChange: sleepEnd
+                    };
+                }
+            }
+            
+            return {
+                status: 'unknown',
+                emoji: '❓',
+                text: '未知状态',
+                desc: '无法判断当前状态',
+                progress: 0
+            };
+        }
+
+        // 格式化时间
+        function formatTime(minutes) {
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+        }
+
+        // 格式化剩余时间
+        function formatDuration(minutes) {
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return `${hours}小时${mins}分`;
+        }
+
+        // 获取即将到来的班次
+        function getUpcomingShift(date) {
+            const cycleDay = getCurrentCycleDay(date);
+            const currentMinutes = date.getHours() * 60 + date.getMinutes();
+            const currentHour = date.getHours();
+            
+            // 睡觉时间边界
+            const sleepStart = timeToMinutes('22:00');
+            const sleepEnd = timeToMinutes('08:30');
+            
+            let nextShift = null;
+            let minutesUntil = 0;
+            
+            // 检查今天的班次
+            const todaySchedule = SCHEDULE[cycleDay];
+            
+            if (todaySchedule.type === 'day') {
+                // 白班日
+                const workStart = timeToMinutes(todaySchedule.start);
+                if (currentMinutes < workStart) {
+                    // 还没上班
+                    nextShift = {
+                        name: todaySchedule.name,
+                        time: todaySchedule.start,
+                        end: todaySchedule.end,
+                        type: 'start'
+                    };
+                    minutesUntil = workStart - currentMinutes;
+                }
+            } else if (todaySchedule.type === 'night') {
+                // 夜班日
+                const shift1Start = timeToMinutes(todaySchedule.shifts[0].start);
+                const shift1End = timeToMinutes(todaySchedule.shifts[0].end);
+                const shift2Start = timeToMinutes(todaySchedule.shifts[1].start);
+                const shift2End = timeToMinutes(todaySchedule.shifts[1].end);
+                
+                if (currentMinutes < shift1Start) {
+                    // 凌晨2:30前，第一个夜班还没开始
+                    nextShift = {
+                        name: todaySchedule.shifts[0].name,
+                        time: todaySchedule.shifts[0].start,
+                        end: todaySchedule.shifts[0].end,
+                        type: 'start'
+                    };
+                    minutesUntil = shift1Start - currentMinutes;
+                } else if (currentMinutes >= shift1End && currentMinutes < shift2Start) {
+                    // 两个夜班之间
+                    // 将26:30转换为次日02:30显示
+                    const endTimeMin = timeToMinutes(todaySchedule.shifts[1].end);
+                    const displayEnd = endTimeMin >= 24 * 60 ? 
+                        '次日' + formatTime(endTimeMin - 24 * 60) : 
+                        todaySchedule.shifts[1].end;
+                    nextShift = {
+                        name: todaySchedule.shifts[1].name,
+                        time: todaySchedule.shifts[1].start,
+                        end: displayEnd,
+                        type: 'start'
+                    };
+                    minutesUntil = shift2Start - currentMinutes;
+                }
+            }
+            
+            // 如果今天没有即将开始的班次，找下一天的
+            if (!nextShift) {
+                let checkDay = cycleDay;
+                let daysToAdd = 0;
+                
+                while (!nextShift && daysToAdd < 8) {
+                    daysToAdd++;
+                    checkDay = checkDay % 8 + 1;
+                    const nextSchedule = SCHEDULE[checkDay];
+                    
+                    if (nextSchedule.type === 'day') {
+                        nextShift = {
+                            name: nextSchedule.name,
+                            time: nextSchedule.start,
+                            end: nextSchedule.end,
+                            daysLater: daysToAdd
+                        };
+                        // 计算到下一天上班时间的分钟数
+                        const remainingToday = 24 * 60 - currentMinutes;
+                        const untilSleepEnd = (daysToAdd - 1) * 24 * 60 + timeToMinutes(nextSchedule.start);
+                        minutesUntil = remainingToday + untilSleepEnd;
+                    } else if (nextSchedule.type === 'night') {
+                        // 夜班从凌晨2:30开始
+                        nextShift = {
+                            name: nextSchedule.shifts[0].name,
+                            time: nextSchedule.shifts[0].start,
+                            end: nextSchedule.shifts[0].end,
+                            daysLater: daysToAdd
+                        };
+                        const remainingToday = 24 * 60 - currentMinutes;
+                        const untilShiftStart = (daysToAdd - 1) * 24 * 60 + timeToMinutes(nextSchedule.shifts[0].start);
+                        minutesUntil = remainingToday + untilShiftStart;
+                    }
+                }
+            }
+            
+            return {
+                shift: nextShift,
+                minutesUntil: minutesUntil
+            };
+        }
+
+        // 更新角色表情
+        function updateCharacter(status) {
+            const eyes = document.getElementById('eyes');
+            const eyesClosed = document.getElementById('eyes-closed');
+            const eyesWorking = document.getElementById('eyes-working');
+            const eyesPreparing = document.getElementById('eyes-preparing');
+            const mouth = document.getElementById('mouth');
+            const mouthWorking = document.getElementById('mouth-working');
+            const mouthSleeping = document.getElementById('mouth-sleeping');
+            const mouthPreparing = document.getElementById('mouth-preparing');
+            const zzz = document.getElementById('zzz');
+            const sweat = document.getElementById('sweat');
+            const music = document.getElementById('music');
+            const pillow = document.getElementById('pillow');
+            const tools = document.getElementById('tools');
+            const preparing = document.getElementById('preparing');
+            const blush = document.getElementById('blush');
+            const speedLines = document.getElementById('speed-lines');
+            
+            // 重置所有
+            eyes.style.display = 'block';
+            eyesClosed.style.display = 'none';
+            eyesWorking.style.display = 'none';
+            if (eyesPreparing) eyesPreparing.style.display = 'none';
+            mouth.style.display = 'block';
+            if (mouthWorking) mouthWorking.style.display = 'none';
+            if (mouthSleeping) mouthSleeping.style.display = 'none';
+            if (mouthPreparing) mouthPreparing.style.display = 'none';
+            zzz.style.display = 'none';
+            sweat.style.display = 'none';
+            music.style.display = 'none';
+            pillow.style.display = 'none';
+            tools.style.display = 'none';
+            if (preparing) preparing.style.display = 'none';
+            if (blush) blush.style.opacity = '0.3';
+            if (speedLines) speedLines.style.display = 'none';
+            
+            if (status === 'sleeping') {
+                eyes.style.display = 'none';
+                eyesClosed.style.display = 'block';
+                mouth.style.display = 'none';
+                if (mouthSleeping) mouthSleeping.style.display = 'block';
+                zzz.style.display = 'block';
+                pillow.style.display = 'block';
+                if (blush) blush.style.opacity = '0.2';
+            } else if (status === 'working') {
+                eyes.style.display = 'none';
+                eyesWorking.style.display = 'block';
+                mouth.style.display = 'none';
+                if (mouthWorking) mouthWorking.style.display = 'block';
+                sweat.style.display = 'block';
+                tools.style.display = 'block';
+                if (speedLines) speedLines.style.display = 'block';
+                if (blush) blush.style.opacity = '0.2';
+            } else if (status === 'preparing') {
+                eyes.style.display = 'none';
+                if (eyesPreparing) eyesPreparing.style.display = 'block';
+                mouth.style.display = 'none';
+                if (mouthPreparing) mouthPreparing.style.display = 'block';
+                if (preparing) preparing.style.display = 'block';
+                if (blush) blush.style.opacity = '0.4';
+            } else if (status === 'resting') {
+                music.style.display = 'block';
+                if (blush) blush.style.opacity = '0.5';
+            }
+        }
+
+        // 更新页面
+        function updatePage() {
+            const now = new Date();
+            const cycleDay = getCurrentCycleDay(now);
+            const status = getCurrentStatus(now);
+            const schedule = SCHEDULE[cycleDay];
+            
+            // 更新时间
+            document.getElementById('currentTime').textContent = 
+                `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            
+            // 更新轮班天数
+            document.getElementById('cycleDay').textContent = `第${cycleDay}天`;
+            
+            // 更新状态卡片
+            document.getElementById('statusEmoji').textContent = status.emoji;
+            document.getElementById('statusText').textContent = status.text;
+            document.getElementById('statusDesc').textContent = status.desc;
+            
+            // 更新进度条
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${status.progress}%`;
+            progressBar.className = `progress-bar ${status.status}`;
+            
+            // 更新时间剩余和标签
+            const timeLeftLabel = document.getElementById('timeLeftLabel');
+            if (status.status === 'working') {
+                timeLeftLabel.textContent = '距离下班还有';
+                if (status.timeLeft) {
+                    document.getElementById('timeLeft').textContent = formatDuration(status.timeLeft);
+                }
+            } else {
+                // 没在上班，显示距离下一个变化的时间
+                if (status.status === 'preparing') {
+                    timeLeftLabel.textContent = '距离上班还有';
+                } else if (status.status === 'resting') {
+                    timeLeftLabel.textContent = '距离睡觉还有';
+                } else if (status.status === 'sleeping') {
+                    timeLeftLabel.textContent = '距离起床还有';
+                } else {
+                    timeLeftLabel.textContent = '距离上班还有';
+                }
+                
+                if (status.nextChange) {
+                    const diff = status.nextChange - (now.getHours() * 60 + now.getMinutes());
+                    const realDiff = diff > 0 ? diff : diff + 24 * 60;
+                    document.getElementById('timeLeft').textContent = formatDuration(realDiff);
+                }
+            }
+            
+            // 更新排班详情
+            let scheduleText = `今天是${now.getMonth() + 1}月${now.getDate()}日，本轮第${cycleDay}天`;
+            if (schedule.type === 'rest') {
+                scheduleText += `，${schedule.name}`;
+            } else if (schedule.type === 'day') {
+                scheduleText += `，${schedule.start}-${schedule.end} ${schedule.name}`;
+            } else if (schedule.type === 'night') {
+                if (now.getHours() >= 19 || now.getHours() < 2) {
+                    scheduleText += `，正在上前夜班 19:00-次日02:30`;
+                } else if (now.getHours() >= 2 && now.getHours() < 8) {
+                    scheduleText += `，刚下后夜班，即将上前夜班 19:00开始`;
+                } else {
+                    scheduleText += `，后夜班已结束，前夜班 19:00-次日02:30`;
+                }
+            }
+            document.getElementById('scheduleDetail').textContent = scheduleText;
+            
+            // 更新即将到来的班次/下班卡片
+            const upcomingCard = document.getElementById('upcomingCard');
+            upcomingCard.className = 'upcoming-card ' + status.status;
+            
+            if (status.status === 'working') {
+                // 正在上班，显示距离下班
+                document.querySelector('.upcoming-label').textContent = '🏃 距离下班还有';
+                if (status.timeLeft) {
+                    document.getElementById('upcomingTime').textContent = formatDuration(status.timeLeft);
+                    document.getElementById('upcomingShift').textContent = '就下班了';
+                    document.getElementById('upcomingDetail').textContent = '加油！坚持就是胜利';
+                }
+            } else if (status.status === 'preparing') {
+                // 准备上班
+                document.querySelector('.upcoming-label').textContent = '⏰ 即将上班';
+                if (status.timeLeft) {
+                    document.getElementById('upcomingTime').textContent = formatDuration(status.timeLeft);
+                    document.getElementById('upcomingShift').textContent = '后出发';
+                    // 获取当前班次信息
+                    let shiftDetail = '';
+                    if (schedule.type === 'day') {
+                        shiftDetail = `${schedule.start} - ${schedule.end} 白班`;
+                    } else if (schedule.type === 'night') {
+                        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+                        if (currentMinutes < timeToMinutes(schedule.shifts[0].start)) {
+                            shiftDetail = `${schedule.shifts[0].start} - ${schedule.shifts[0].end} 后夜班`;
+                        } else {
+                            // 将26:30转换为02:30显示
+                            const endMin = timeToMinutes(schedule.shifts[1].end);
+                            const endDisplay = endMin >= 24 * 60 ? formatTime(endMin - 24 * 60) : schedule.shifts[1].end;
+                            shiftDetail = `${schedule.shifts[1].start} - 次日${endDisplay} 前夜班`;
+                        }
+                    }
+                    document.getElementById('upcomingDetail').textContent = shiftDetail;
+                }
+            } else {
+                // 其他状态，显示即将到来的班次
+                document.querySelector('.upcoming-label').textContent = '⏰ 即将上什么班';
+                const upcoming = getUpcomingShift(now);
+                if (upcoming && upcoming.shift) {
+                    const daysText = upcoming.shift.daysLater ? 
+                        (upcoming.shift.daysLater === 1 ? '明天' : `${upcoming.shift.daysLater}天后`) : '';
+                    const timeText = formatDuration(upcoming.minutesUntil);
+                    
+                    document.getElementById('upcomingTime').textContent = 
+                        upcoming.shift.daysLater ? `${daysText} ${upcoming.shift.time}` : `${timeText}后`;
+                    document.getElementById('upcomingShift').textContent = `上${upcoming.shift.name}`;
+                    // 处理跨天时间的显示
+                    let displayEnd = upcoming.shift.end;
+                    if (upcoming.shift.name.includes('前夜班') && upcoming.shift.end.includes(':')) {
+                        // 已经是格式化过的，直接显示
+                        displayEnd = upcoming.shift.end;
+                    }
+                    document.getElementById('upcomingDetail').textContent = 
+                        `${upcoming.shift.time} - ${displayEnd}`;
+                } else {
+                    document.getElementById('upcomingTime').textContent = '暂无排班';
+                    document.getElementById('upcomingShift').textContent = '';
+                    document.getElementById('upcomingDetail').textContent = '';
+                }
+            }
+            
+            // 更新角色表情
+            updateCharacter(status.status);
+        }
+
+        // 初始化并定时更新
+        updatePage();
+        setInterval(updatePage, 60000); // 每分钟更新一次
+    </script>
+</body>
+</html>
