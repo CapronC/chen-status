@@ -547,35 +547,73 @@
         // 第6-8天: 大休
         
         // 基准日期：2026年4月30日是第2天
-        const BASE_DATE = new Date('2026-04-30');
+        const BASE_DATE = new Date(2026, 3, 30); // 月份从0开始，3=4月
         const BASE_CYCLE_DAY = 2;
         
-        // 班次定义
-        const SCHEDULE = {
-            1: { name: '白班', type: 'day', start: '08:00', end: '19:00', emoji: '☀️' },
-            2: { 
-                name: '前后夜班', 
-                type: 'night', 
-                shifts: [
-                    { name: '后夜班', start: '02:30', end: '08:30' },
-                    { name: '前夜班', start: '19:00', end: '26:30' } // 26:30 = 次日02:30
-                ],
-                emoji: '🌙'
-            },
-            3: { name: '小休', type: 'rest', emoji: '😴' },
-            4: { name: '白班', type: 'day', start: '08:00', end: '19:00', emoji: '☀️' },
-            5: { 
-                name: '前后夜班', 
-                type: 'night', 
-                shifts: [
-                    { name: '后夜班', start: '02:30', end: '08:30' },
-                    { name: '前夜班', start: '19:00', end: '26:30' }
-                ],
-                emoji: '🌙'
-            },
-            6: { name: '大休-第1天', type: 'rest', emoji: '🎉' },
-            7: { name: '大休-第2天', type: 'rest', emoji: '🎉' },
-            8: { name: '大休-第3天', type: 'rest', emoji: '🎉' }
+        // 8天周期时间表模型 - 查表法
+        // 每天的时间段定义，时间用分钟表示（0-1440），覆盖全天24小时
+        const DAY_SCHEDULES = {
+            // 第1天：白班日（分段睡眠）
+            1: [
+                { start: 0, end: 420, status: 'sleeping', text: '睡觉中', desc: '为白班养精蓄锐', emoji: '😴' },
+                { start: 420, end: 480, status: 'preparing', text: '准备上班', desc: '准备上白班', emoji: '🎒' },
+                { start: 480, end: 1140, status: 'working', text: '工作中', desc: '正在上白班 08:00-19:00', emoji: '☀️' },
+                { start: 1140, end: 1320, status: 'resting', text: '休息中', desc: '白班结束，休息放松', emoji: '😊' },
+                { start: 1320, end: 1440, status: 'sleeping', text: '睡觉中', desc: '短暂休息，准备后夜班', emoji: '😴' }
+            ],
+            // 第2天：前后夜班日
+            2: [
+                { start: 0, end: 130, status: 'sleeping', text: '睡觉中', desc: '短暂休息，准备后夜班', emoji: '😴' },
+                { start: 130, end: 150, status: 'preparing', text: '准备上班', desc: '准备上后夜班', emoji: '🎒' },
+                { start: 150, end: 510, status: 'working', text: '工作中', desc: '正在上后夜班 02:30-08:30', emoji: '🌙' },
+                { start: 510, end: 1080, status: 'resting', text: '休息中', desc: '后夜班结束，休息中', emoji: '☕' },
+                { start: 1080, end: 1140, status: 'preparing', text: '准备上班', desc: '准备上前夜班', emoji: '🎒' },
+                { start: 1140, end: 1440, status: 'working', text: '工作中', desc: '正在上前夜班 19:00-次日02:30', emoji: '🌙' }
+            ],
+            // 第3天：小休
+            3: [
+                { start: 0, end: 150, status: 'working', text: '工作中', desc: '正在上前夜班 19:00-次日02:30', emoji: '🌙' },
+                { start: 150, end: 510, status: 'sleeping', text: '睡觉中', desc: '下前夜班后补觉', emoji: '😴' },
+                { start: 510, end: 1380, status: 'resting', text: '休息中', desc: '小休 - 享受自由时光', emoji: '😴' },
+                { start: 1380, end: 1440, status: 'sleeping', text: '睡觉中', desc: '为明天白班养精蓄锐', emoji: '😴' }
+            ],
+            // 第4天：白班日（同第1天）
+            4: [
+                { start: 0, end: 420, status: 'sleeping', text: '睡觉中', desc: '为白班养精蓄锐', emoji: '😴' },
+                { start: 420, end: 480, status: 'preparing', text: '准备上班', desc: '准备上白班', emoji: '🎒' },
+                { start: 480, end: 1140, status: 'working', text: '工作中', desc: '正在上白班 08:00-19:00', emoji: '☀️' },
+                { start: 1140, end: 1320, status: 'resting', text: '休息中', desc: '白班结束，休息放松', emoji: '😊' },
+                { start: 1320, end: 1440, status: 'sleeping', text: '睡觉中', desc: '短暂休息，准备后夜班', emoji: '😴' }
+            ],
+            // 第5天：前后夜班日（同第2天）
+            5: [
+                { start: 0, end: 130, status: 'sleeping', text: '睡觉中', desc: '短暂休息，准备后夜班', emoji: '😴' },
+                { start: 130, end: 150, status: 'preparing', text: '准备上班', desc: '准备上后夜班', emoji: '🎒' },
+                { start: 150, end: 510, status: 'working', text: '工作中', desc: '正在上后夜班 02:30-08:30', emoji: '🌙' },
+                { start: 510, end: 1080, status: 'resting', text: '休息中', desc: '后夜班结束，休息中', emoji: '☕' },
+                { start: 1080, end: 1140, status: 'preparing', text: '准备上班', desc: '准备上前夜班', emoji: '🎒' },
+                { start: 1140, end: 1440, status: 'working', text: '工作中', desc: '正在上前夜班 19:00-次日02:30', emoji: '🌙' }
+            ],
+            // 第6天：大休第1天
+            6: [
+                { start: 0, end: 150, status: 'working', text: '工作中', desc: '正在上前夜班 19:00-次日02:30', emoji: '🌙' },
+                { start: 150, end: 180, status: 'preparing', text: '通勤中', desc: '下前夜班后通勤', emoji: '🚶' },
+                { start: 180, end: 540, status: 'sleeping', text: '睡觉中', desc: '大休开始，补觉中', emoji: '😴' },
+                { start: 540, end: 1380, status: 'resting', text: '休息中', desc: '大休第1天 - 享受假期', emoji: '🎉' },
+                { start: 1380, end: 1440, status: 'sleeping', text: '睡觉中', desc: '好好休息', emoji: '😴' }
+            ],
+            // 第7天：大休第2天
+            7: [
+                { start: 0, end: 510, status: 'sleeping', text: '睡觉中', desc: '好好休息', emoji: '😴' },
+                { start: 510, end: 1380, status: 'resting', text: '休息中', desc: '大休第2天 - 享受假期', emoji: '🎉' },
+                { start: 1380, end: 1440, status: 'sleeping', text: '睡觉中', desc: '好好休息', emoji: '😴' }
+            ],
+            // 第8天：大休第3天
+            8: [
+                { start: 0, end: 510, status: 'sleeping', text: '睡觉中', desc: '好好休息', emoji: '😴' },
+                { start: 510, end: 1380, status: 'resting', text: '休息中', desc: '大休第3天 - 享受假期', emoji: '🎉' },
+                { start: 1380, end: 1440, status: 'sleeping', text: '睡觉中', desc: '明天开始新周期', emoji: '😴' }
+            ]
         };
 
         // 获取当前是第几天
@@ -594,218 +632,45 @@
             return hours * 60 + minutes;
         }
 
-        // 获取当前状态
+        // 获取当前状态 - 使用查表法
         function getCurrentStatus(date) {
             const cycleDay = getCurrentCycleDay(date);
-            const schedule = SCHEDULE[cycleDay];
             const currentMinutes = date.getHours() * 60 + date.getMinutes();
             
-            // 判断是否在睡觉时间 (22:00 - 08:30)
-            const sleepStart = timeToMinutes('22:00');
-            const sleepEnd = timeToMinutes('08:30');
-            
-            // 休息日
-            if (schedule.type === 'rest') {
-                // 判断是否睡觉时间
-                if (currentMinutes >= sleepStart || currentMinutes < sleepEnd) {
-                    return {
-                        status: 'sleeping',
-                        emoji: '😴',
-                        text: '睡觉中',
-                        desc: '正在美美的梦乡中',
-                        progress: 0,
-                        nextChange: sleepEnd
-                    };
-                }
-                return {
-                    status: 'resting',
-                    emoji: schedule.emoji,
-                    text: '休息中',
-                    desc: `${schedule.name} - 享受自由时光`,
-                    progress: 0,
-                    nextChange: sleepStart
-                };
+            // 获取当天的所有时间段
+            const daySchedule = DAY_SCHEDULES[cycleDay];
+            if (!daySchedule) {
+                return { status: 'resting', emoji: '🤔', text: '状态未知', desc: '正在计算中...', progress: 0, nextChange: 0 };
             }
             
-            // 白班日
-            if (schedule.type === 'day') {
-                const workStart = timeToMinutes(schedule.start);
-                const workEnd = timeToMinutes(schedule.end);
-                const prepStart = workStart - 60; // 白班前1小时开始准备
-                
-                // 上班前睡觉
-                if (currentMinutes < sleepEnd && currentMinutes >= 0) {
-                    return {
-                        status: 'sleeping',
-                        emoji: '😴',
-                        text: '睡觉中',
-                        desc: '养精蓄锐准备上班',
-                        progress: 0,
-                        nextChange: sleepEnd
-                    };
-                }
-
-                // 准备上班状态 - 白班前1小时
-                if (currentMinutes >= prepStart && currentMinutes < workStart) {
-                    const prepTotal = 60;
-                    const prepElapsed = currentMinutes - prepStart;
-                    const progress = (prepElapsed / prepTotal) * 100;
-                    return {
-                        status: 'preparing',
-                        emoji: '🎒',
-                        text: '准备上班',
-                        desc: `即将上白班，收拾准备中`,
-                        progress: progress,
-                        timeLeft: workStart - currentMinutes,
-                        nextChange: workStart
-                    };
-                }
-                
-                // 工作中
-                if (currentMinutes >= workStart && currentMinutes < workEnd) {
-                    const totalWork = workEnd - workStart;
-                    const elapsed = currentMinutes - workStart;
-                    const progress = (elapsed / totalWork) * 100;
-                    return {
-                        status: 'working',
-                        emoji: schedule.emoji,
-                        text: '工作中',
-                        desc: `正在上${schedule.name} ${schedule.start}-${schedule.end}`,
-                        progress: progress,
-                        timeLeft: workEnd - currentMinutes,
-                        nextChange: workEnd
-                    };
-                }
-                
-                // 下班后休息
-                if (currentMinutes >= workEnd && currentMinutes < sleepStart) {
-                    return {
-                        status: 'resting',
-                        emoji: '😊',
-                        text: '休息中',
-                        desc: '白班结束，放松时间',
-                        progress: 0,
-                        nextChange: sleepStart
-                    };
-                }
-                
-                // 睡觉时间
-                if (currentMinutes >= sleepStart) {
-                    return {
-                        status: 'sleeping',
-                        emoji: '😴',
-                        text: '睡觉中',
-                        desc: '准备明天的班次',
-                        progress: 0,
-                        nextChange: sleepEnd + 24 * 60 // 次日
-                    };
+            // 查找当前时间所在的时间段
+            let currentSlot = null;
+            for (const slot of daySchedule) {
+                if (currentMinutes >= slot.start && currentMinutes < slot.end) {
+                    currentSlot = slot;
+                    break;
                 }
             }
             
-            // 夜班日
-            if (schedule.type === 'night') {
-                const shift1Start = timeToMinutes(schedule.shifts[0].start);
-                const shift1End = timeToMinutes(schedule.shifts[0].end);
-                const shift2Start = timeToMinutes(schedule.shifts[1].start);
-                const shift2End = timeToMinutes(schedule.shifts[1].end); // 26:30
-                const shift1PrepStart = shift1Start - 20; // 后夜班前20分钟准备
-                const shift2PrepStart = shift2Start - 60; // 前夜班前1小时准备
-                
-                // 准备上班状态 - 后夜班前20分钟
-                if (currentMinutes >= shift1PrepStart && currentMinutes < shift1Start) {
-                    const prepTotal = 20;
-                    const prepElapsed = currentMinutes - shift1PrepStart;
-                    const progress = (prepElapsed / prepTotal) * 100;
-                    return {
-                        status: 'preparing',
-                        emoji: '🎒',
-                        text: '准备上班',
-                        desc: `即将上后夜班，准备出门`,
-                        progress: progress,
-                        timeLeft: shift1Start - currentMinutes,
-                        nextChange: shift1Start
-                    };
-                }
-                
-                // 第一个夜班 (02:30-08:30)
-                if (currentMinutes >= shift1Start && currentMinutes < shift1End) {
-                    const totalWork = shift1End - shift1Start;
-                    const elapsed = currentMinutes - shift1Start;
-                    const progress = (elapsed / totalWork) * 100;
-                    return {
-                        status: 'working',
-                        emoji: '🌙',
-                        text: '工作中',
-                        desc: `正在上后夜班 ${schedule.shifts[0].start}-${schedule.shifts[0].end}`,
-                        progress: progress,
-                        timeLeft: shift1End - currentMinutes,
-                        nextChange: shift1End
-                    };
-                }
-
-                // 准备上班状态 - 前夜班前1小时
-                if (currentMinutes >= shift2PrepStart && currentMinutes < shift2Start) {
-                    const prepTotal = 60;
-                    const prepElapsed = currentMinutes - shift2PrepStart;
-                    const progress = (prepElapsed / prepTotal) * 100;
-                    return {
-                        status: 'preparing',
-                        emoji: '🎒',
-                        text: '准备上班',
-                        desc: `即将上前夜班，收拾准备中`,
-                        progress: progress,
-                        timeLeft: shift2Start - currentMinutes,
-                        nextChange: shift2Start
-                    };
-                }
-                
-                // 两个夜班之间的休息
-                if (currentMinutes >= shift1End && currentMinutes < shift2PrepStart) {
-                    return {
-                        status: 'resting',
-                        emoji: '☕',
-                        text: '休息中',
-                        desc: '刚下后夜班，休息充电中',
-                        progress: 0,
-                        nextChange: shift2PrepStart
-                    };
-                }
-                
-                // 第二个夜班 (19:00-次日02:30)
-                if (currentMinutes >= shift2Start) {
-                    const totalWork = shift2End - shift2Start;
-                    const elapsed = currentMinutes - shift2Start;
-                    const progress = (elapsed / totalWork) * 100;
-                    return {
-                        status: 'working',
-                        emoji: '🌙',
-                        text: '工作中',
-                        desc: `正在上前夜班 ${schedule.shifts[1].start}-次日${schedule.shifts[1].end.substring(0, 5)}`,
-                        progress: progress,
-                        timeLeft: shift2End - currentMinutes,
-                        nextChange: shift2End
-                    };
-                }
-                
-                // 凌晨02:30-08:30 睡觉
-                if (currentMinutes >= 0 && currentMinutes < sleepEnd) {
-                    return {
-                        status: 'sleeping',
-                        emoji: '😴',
-                        text: '睡觉中',
-                        desc: '刚下前夜班，补觉中',
-                        progress: 0,
-                        nextChange: sleepEnd
-                    };
-                }
+            // 如果没找到（理论上不会发生），返回休息状态
+            if (!currentSlot) {
+                return { status: 'resting', emoji: '🤔', text: '状态未知', desc: '正在计算中...', progress: 0, nextChange: 0 };
             }
+            
+            // 计算进度和剩余时间
+            const totalDuration = currentSlot.end - currentSlot.start;
+            const elapsed = currentMinutes - currentSlot.start;
+            const progress = (elapsed / totalDuration) * 100;
+            const timeLeft = currentSlot.end - currentMinutes;
             
             return {
-                status: 'unknown',
-                emoji: '❓',
-                text: '未知状态',
-                desc: '无法判断当前状态',
-                progress: 0
+                status: currentSlot.status,
+                emoji: currentSlot.emoji,
+                text: currentSlot.text,
+                desc: currentSlot.desc,
+                progress: progress,
+                timeLeft: timeLeft,
+                nextChange: currentSlot.end
             };
         }
 
@@ -823,21 +688,35 @@
             return `${hours}小时${mins}分`;
         }
 
+        // 班次信息配置（用于getUpcomingShift）
+        const SHIFT_INFO = {
+            1: { type: 'day', name: '白班', start: '08:00', end: '19:00' },
+            2: { type: 'night', shifts: [
+                { name: '后夜班', start: '02:30', end: '08:30' },
+                { name: '前夜班', start: '19:00', end: '次日02:30' }
+            ]},
+            3: { type: 'rest', name: '小休' },
+            4: { type: 'day', name: '白班', start: '08:00', end: '19:00' },
+            5: { type: 'night', shifts: [
+                { name: '后夜班', start: '02:30', end: '08:30' },
+                { name: '前夜班', start: '19:00', end: '次日02:30' }
+            ]},
+            6: { type: 'rest', name: '大休第1天' },
+            7: { type: 'rest', name: '大休第2天' },
+            8: { type: 'rest', name: '大休第3天' }
+        };
+
         // 获取即将到来的班次
         function getUpcomingShift(date) {
             const cycleDay = getCurrentCycleDay(date);
             const currentMinutes = date.getHours() * 60 + date.getMinutes();
             const currentHour = date.getHours();
             
-            // 睡觉时间边界
-            const sleepStart = timeToMinutes('22:00');
-            const sleepEnd = timeToMinutes('08:30');
-            
             let nextShift = null;
             let minutesUntil = 0;
             
             // 检查今天的班次
-            const todaySchedule = SCHEDULE[cycleDay];
+            const todaySchedule = SHIFT_INFO[cycleDay];
             
             if (todaySchedule.type === 'day') {
                 // 白班日
@@ -857,7 +736,6 @@
                 const shift1Start = timeToMinutes(todaySchedule.shifts[0].start);
                 const shift1End = timeToMinutes(todaySchedule.shifts[0].end);
                 const shift2Start = timeToMinutes(todaySchedule.shifts[1].start);
-                const shift2End = timeToMinutes(todaySchedule.shifts[1].end);
                 
                 if (currentMinutes < shift1Start) {
                     // 凌晨2:30前，第一个夜班还没开始
@@ -870,15 +748,10 @@
                     minutesUntil = shift1Start - currentMinutes;
                 } else if (currentMinutes >= shift1End && currentMinutes < shift2Start) {
                     // 两个夜班之间
-                    // 将26:30转换为次日02:30显示
-                    const endTimeMin = timeToMinutes(todaySchedule.shifts[1].end);
-                    const displayEnd = endTimeMin >= 24 * 60 ? 
-                        '次日' + formatTime(endTimeMin - 24 * 60) : 
-                        todaySchedule.shifts[1].end;
                     nextShift = {
                         name: todaySchedule.shifts[1].name,
                         time: todaySchedule.shifts[1].start,
-                        end: displayEnd,
+                        end: '次日02:30',
                         type: 'start'
                     };
                     minutesUntil = shift2Start - currentMinutes;
@@ -893,7 +766,7 @@
                 while (!nextShift && daysToAdd < 8) {
                     daysToAdd++;
                     checkDay = checkDay % 8 + 1;
-                    const nextSchedule = SCHEDULE[checkDay];
+                    const nextSchedule = SHIFT_INFO[checkDay];
                     
                     if (nextSchedule.type === 'day') {
                         nextShift = {
@@ -999,7 +872,7 @@
             const now = new Date();
             const cycleDay = getCurrentCycleDay(now);
             const status = getCurrentStatus(now);
-            const schedule = SCHEDULE[cycleDay];
+            const schedule = SHIFT_INFO[cycleDay];
             
             // 更新时间
             document.getElementById('currentTime').textContent = 
@@ -1020,14 +893,20 @@
             
             // 更新时间剩余和标签
             const timeLeftLabel = document.getElementById('timeLeftLabel');
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            
             if (status.status === 'working') {
                 timeLeftLabel.textContent = '距离下班还有';
                 if (status.timeLeft) {
                     document.getElementById('timeLeft').textContent = formatDuration(status.timeLeft);
                 }
             } else {
-                // 没在上班，显示距离下一个变化的时间
-                if (status.status === 'preparing') {
+                // 特殊情况：第6天通勤时间（02:30-03:00）接下来是睡觉
+                const isCommute = cycleDay === 6 && currentMinutes >= 150 && currentMinutes < 180;
+                
+                if (status.status === 'preparing' && isCommute) {
+                    timeLeftLabel.textContent = '距离睡觉还有';
+                } else if (status.status === 'preparing') {
                     timeLeftLabel.textContent = '距离上班还有';
                 } else if (status.status === 'resting') {
                     timeLeftLabel.textContent = '距离睡觉还有';
@@ -1038,26 +917,25 @@
                 }
                 
                 if (status.nextChange) {
-                    const diff = status.nextChange - (now.getHours() * 60 + now.getMinutes());
+                    const diff = status.nextChange - currentMinutes;
                     const realDiff = diff > 0 ? diff : diff + 24 * 60;
                     document.getElementById('timeLeft').textContent = formatDuration(realDiff);
                 }
             }
             
-            // 更新排班详情
-            let scheduleText = `今天是${now.getMonth() + 1}月${now.getDate()}日，本轮第${cycleDay}天`;
-            if (schedule.type === 'rest') {
-                scheduleText += `，${schedule.name}`;
-            } else if (schedule.type === 'day') {
-                scheduleText += `，${schedule.start}-${schedule.end} ${schedule.name}`;
-            } else if (schedule.type === 'night') {
-                if (now.getHours() >= 19 || now.getHours() < 2) {
-                    scheduleText += `，正在上前夜班 19:00-次日02:30`;
-                } else if (now.getHours() >= 2 && now.getHours() < 8) {
-                    scheduleText += `，刚下后夜班，即将上前夜班 19:00开始`;
-                } else {
-                    scheduleText += `，后夜班已结束，前夜班 19:00-次日02:30`;
+            // 更新排班详情 - 直接从时间点模型表获取
+            const daySchedule = DAY_SCHEDULES[cycleDay];
+            let currentSlot = null;
+            for (const slot of daySchedule) {
+                if (currentMinutes >= slot.start && currentMinutes < slot.end) {
+                    currentSlot = slot;
+                    break;
                 }
+            }
+            
+            let scheduleText = `今天是${now.getMonth() + 1}月${now.getDate()}日，本轮第${cycleDay}天`;
+            if (currentSlot) {
+                scheduleText += `，${currentSlot.desc}`;
             }
             document.getElementById('scheduleDetail').textContent = scheduleText;
             
